@@ -8,8 +8,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/prometheus/common/version"
 	"log"
-	"os"
-	"os/exec"
+	//"os"
+	//"os/exec"
 	"time"
 	//"log"
 	"net/http"
@@ -91,67 +91,65 @@ func main() {
 		fmt.Println("exporter call over")
 	}()
 
+	_ = pm.GetSwitchStateJSON()
+	if err != nil {
+		log.Printf(
+			"%v",
+			err,
+		)
+	}
 	//Prometheus Metrics using Gauge
-	voltage_count := promauto.NewGauge(
+	voltageCount := promauto.NewGauge(
 		prometheus.GaugeOpts{
 			Name: "voltage_count",
 			Help: "voltage calibarated in powermeter",
 		},
 	)
 
-	current_count := promauto.NewGauge(
+	currentCount := promauto.NewGauge(
 		prometheus.GaugeOpts{
 			Name: "current_count",
 			Help: "current calibarated in powermeter",
 		},
 	)
 
-	_, err := pm.SwitchPowerMeter()
-	if err != nil {
-		log.Printf("%v",err)
-	}
-
-	ticker := time.NewTicker(500 * time.Millisecond)
-	done := make(chan bool)
-
-	ticker := time.NewTicker(5 * time.Millisecond)
+	ticker := time.NewTicker(5 * time.Second)
 	done := make(chan bool)
 	for {
 		go getEnergyFromPowerMeter(
 			done,
 			ticker,
+			voltageCount,
+			currentCount,
 		)
-		time.Sleep(20 * time.Second)
-	}
-
-}
-
-func getEnergyFromPowerMeter(done chan bool, ticker *time.Ticker) {
-	select {
-	case <-done:
-		return
-	case t := <-ticker.C:
-		fmt.Println(
-			"Tick at",
-			t,
-		)
-		fmt.Println("command started")
-
-		// parse_csv_and_publish(path)
-		energyStats := pm.GetEnergyStats()
-
-		//publish
-		////Fetch wakeup data
-		ptWakeupCount.Set(sysInfo.Wakeups)
-
-		////Fetch cpuUsage data
-		ptCpuUsageCount.Set(sysInfo.CpuUsage)
-
-		////Fetch baseLine power
-		ptBaselinePowerCount.Set(baseLinePower)
-
-		//Fetch no of tunables
-		ptTuCount.Set(float64(tunNum))
+		fmt.Println("ysessss")
+		time.Sleep(5 * time.Second)
+		done <- true
 	}
 }
+
+func getEnergyFromPowerMeter(done chan bool, ticker *time.Ticker, voltageCount prometheus.Gauge, currentCount prometheus.Gauge) {
+	for {
+		select {
+		case <-done:
+			return
+		case t := <-ticker.C:
+			fmt.Println(
+				"Tick at",
+				t,
+			)
+			fmt.Println("command started")
+
+			// parse_csv_and_publish(path)
+			energyStats := pm.GetEnergyStats()
+
+			//publish
+			////Fetch wakeup data
+			fmt.Println("%%%%%%%%%%%%%%%%%%%")
+			voltageCount.Set(float64(energyStats.StatusSNS.Energy.Voltage))
+			currentCount.Set(energyStats.StatusSNS.Energy.Current)
+			fmt.Println("%%%%%%%%%%%%%%%%%%%")
+		}
+	}
+
 }
