@@ -139,15 +139,11 @@ func getEnergyFromPowerMeter(done chan bool, ticker *time.Ticker, voltageCount p
 			)
 			fmt.Println("command started")
 
-			// parse_csv_and_publish(path)
 			energyStats := pm.GetEnergyStats()
-
-			//publish
-			////Fetch wakeup data
-			//fmt.Println("%%%%%%%%%%%%%%%%%%%")
+			
 			voltageCount.Set(float64(energyStats.StatusSNS.Energy.Voltage))
 			currentCount.Set(energyStats.StatusSNS.Energy.Current)
-			//fmt.Println("%%%%%%%%%%%%%%%%%%%")
+
 		}
 	}
 
