@@ -122,7 +122,6 @@ func main() {
 			voltageCount,
 			currentCount,
 		)
-		fmt.Println("ysessss")
 		time.Sleep(5 * time.Second)
 		done <- true
 	}
@@ -145,10 +144,10 @@ func getEnergyFromPowerMeter(done chan bool, ticker *time.Ticker, voltageCount p
 
 			//publish
 			////Fetch wakeup data
-			fmt.Println("%%%%%%%%%%%%%%%%%%%")
+			//fmt.Println("%%%%%%%%%%%%%%%%%%%")
 			voltageCount.Set(float64(energyStats.StatusSNS.Energy.Voltage))
 			currentCount.Set(energyStats.StatusSNS.Energy.Current)
-			fmt.Println("%%%%%%%%%%%%%%%%%%%")
+			//fmt.Println("%%%%%%%%%%%%%%%%%%%")
 		}
 	}
 
