@@ -6,8 +6,8 @@ Using OS- tools can more or less give accurate information about the energy cons
 But in cases of SBCs like Raspberry Pi, Nvidia Jetson Boards this is not sufficient as there are other factors as well which consume energy comparable to that of CPU computation. Eg.Energy consumption by networking components like Ethernet, GPIO, UART, etc.
 
 To overcome this problem and to get the complete power consumption, an external power meter needs to be integrated into the SBC
+![f83f1a_e2d765a97e914125b200aeefdd810740_mv2](https://user-images.githubusercontent.com/95071627/188454874-a0691223-b8ec-4ee5-b1ac-c28d69ba6306.jpg)
 
-![](../Downloads/f83f1a_e2d765a97e914125b200aeefdd810740_mv2.jpg)
 
 For this we  would be using Tasmota EU plug V2 by Athom . This is based on tasmota-HLW8032 , providing control using MQTT,Web UI , HTTP.
 
@@ -57,7 +57,8 @@ These can be run with graphana and prometheus easily with the docker compose fil
 
 
 The final set up should look like this
+![Screenshot from 2022-09-05 16-50-16](https://user-images.githubusercontent.com/95071627/188454799-a4099d31-dd7b-45fc-940b-89a4ba6c0aa8.png)
 
-![](../Downloads/Screenshot from 2022-09-05 16-50-16.png)
+
 
 Viewing voltage_count variation
