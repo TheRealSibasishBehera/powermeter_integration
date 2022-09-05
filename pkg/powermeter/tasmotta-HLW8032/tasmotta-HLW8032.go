@@ -29,11 +29,6 @@ type SwitchState struct {
 	Power string `json:"POWER"`
 }
 
-//var (
-//	energyState EnergyStats
-//	switchState SwitchState
-//)
-
 func SwitchPowerMeter() []byte {
 	resp, err := http.Get("http://192.168.43.51/cm?cmnd=POWER+TOGGLE")
 	if err != nil {

@@ -140,7 +140,7 @@ func getEnergyFromPowerMeter(done chan bool, ticker *time.Ticker, voltageCount p
 			fmt.Println("command started")
 
 			energyStats := pm.GetEnergyStats()
-			
+
 			voltageCount.Set(float64(energyStats.StatusSNS.Energy.Voltage))
 			currentCount.Set(energyStats.StatusSNS.Energy.Current)
 
