@@ -11,53 +11,172 @@ To overcome this problem and to get the complete power consumption, an external 
 
 For this we  would be using Tasmota EU plug V2 by Athom . This is based on tasmota-HLW8032 , providing control using MQTT,Web UI , HTTP.
 
+For installation of flotta-operator and flotta-edge device  
+follow the flotta guide
 
-<h3>Local SetUp</h3>
+[kind installation](https://project-flotta.io/documentation/v0_2_0/gsg/kind.html)
 
-<h3>Dev SetUp</h3>
-<h4>Pre-requisite</h4>
-<ol>
-   <li>Go compiler <ul>
-</ol>
-<ol>
-   <li> Configured PowerMeter (Tasmotta-HLW8032)  <ul>
-</ol>
+[flotta-dev-cli](https://project-flotta.io/flotta/2022/07/20/developer-cli.html)
+
+<h3>Deploying PoweMeter Workload</h3>
+
+The powertop monitoring application would be deployed as workloads.
+Details on how to deploying workloads are in
+[flotta workloads deployment](https://project-flotta.io/documentation/v0_2_0/gsg/running_workloads.html)
+
+The yaml for the workload  :-
+
+```yaml
+apiVersion: management.project-flotta.io/v1alpha1
+kind: EdgeWorkload
+metadata:
+   name: powermeter
+spec:
+   metrics:
+      interval: 5
+      path: "/metrics"
+      port: 8881
+   deviceSelector:
+      matchLabels:
+         app: foo
+   type: pod
+   pod:
+      spec:
+         hostNetwork: true
+         containers:
+            - name: powermeter
+              image: docker.io/sibseh/powermeter:v4    
+```
+
+<h3>Monitoring Using Thanos</h3>
+
+A thanos and graphana set up can be used for monitoring visually
+
+More details can be found in :-
+
+[flotta observability](https://project-flotta.io/documentation/latest/operations/observability.html)
+
+[writing-metrics-to-control-plane](https://project-flotta.io/flotta/2022/04/11/writing-metrics-to-control-plane.html
+)
 
 
+For Thanos receiver
 
-open up a terminal
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: thanos-receiver
+  labels:
+    app: thanos-receiver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: thanos-receiver
+  template:
+    metadata:
+      labels:
+        app: thanos-receiver
+    spec:
+      containers:
+        - name: receive
+          image: quay.io/thanos/thanos:v0.24.0
+          command:
+            - /bin/thanos
+            - receive
+            - --log.level
+            - debug
+            - --label
+            - "receiver=\"0\""
+            - --remote-write.address
+            - 0.0.0.0:10908
+        - name: query
+          image: quay.io/thanos/thanos:v0.24.0
+          command:
+            - /bin/thanos
+            - query
+            - --log.level
+            - debug
+            - --http-address
+            - 0.0.0.0:9090
+            - --grpc-address
+            - 0.0.0.0:11901
+            - --endpoint
+            - 127.0.0.1:10901
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: thanos-receiver
+spec:
+  type: NodePort
+  selector:
+    app: thanos-receiver
+  ports:
+    - port: 80
+      targetPort: 10908
+      nodePort: 30030
+      name: endpoint
+    - port: 9090
+      targetPort: 9090
+      name: admin
+      
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: thanos-receiver
+spec:
+  type: NodePort
+  selector:
+    app: thanos-receiver
+  ports:
+    - port: 80
+      targetPort: 10908
+      nodePort: 30030
+      name: endpoint
+    - port: 9090
+      targetPort: 9090
+      name: admin
 
-1. Clone the repo ,go in the folder
-
-2. Run using go compiler <code>sudo go run cmd/main.go</code>  
-   powertop requires sudo permission to access the system stats
-
-3. Bare prometheus metrics can be seen using <code>curl 0.0.0.0:8881/metrics</code>
-
-<h3>Run Using Docker</h3>
-
-1. <code> docker run -d -p 8888:8881 sibseh/powermeter:v4</code>  
-2. Bare prometheus metrics can be seen using <code> curl 0.0.0.0:8888/metrics |grep current_count\|voltage_count</code>
-
-These can be run with graphana and prometheus easily with the docker compose file
-
-<h3>Monitoring with Graphana and Prometheus using docker compose </h3>
-
-1. Open up a terminal in the same directory <code>docker-compose up</code>
-
-2. Open your favourite brower with localhost:3000 , it will open up Graphana, login with username and password both as <code>admin</code>
-
-3. Go to configuration ->Data sources -> Add Prometheus -> set Http as <code>http://prometheus:9090</code>
-
-4. Go to create -> Dashboard -> Select one
-
-5. Add current_count , voltage_count
-
-6 . Now you can see clearly the parameters of your system calculated !!
+```
 
 
-The final set up should look like this
+For Graphana
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      name: grafana
+      labels:
+        app: grafana
+    spec:
+      containers:
+        - name: grafana
+          image: grafana/grafana:latest
+          ports:
+            - name: grafana
+              containerPort: 3000
+          resources:
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+            requests:
+              memory: 500M
+              cpu: "500m"
+          volumeMounts:
+            - mountPath: /var/lib/grafana
+              name: grafana-storage
+      volumes:
+        - name: grafana-storage
+```
 
-![](../Downloads/Screenshot from 2022-09-05 16-50-16.png)
-
-Viewing voltage_count variation

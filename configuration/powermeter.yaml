@@ -1,0 +1,19 @@
+apiVersion: management.project-flotta.io/v1alpha1
+kind: EdgeWorkload
+metadata:
+  name: powermeter
+spec:
+  metrics:
+    interval: 5
+    path: "/metrics"
+    port: 8881
+  deviceSelector:
+    matchLabels:
+      app: foo
+  type: pod
+  pod:
+    spec:
+      hostNetwork: true
+      containers:
+        - name: powermeter
+          image: docker.io/sibseh/powermeter:v4
