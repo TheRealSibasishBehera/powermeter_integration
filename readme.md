@@ -7,7 +7,7 @@ But in cases of SBCs like Raspberry Pi, Nvidia Jetson Boards this is not suffici
 
 To overcome this problem and to get the complete power consumption, an external power meter needs to be integrated into the SBC
 
-![](../Downloads/f83f1a_e2d765a97e914125b200aeefdd810740_mv2.jpg)
+![f83f1a_e2d765a97e914125b200aeefdd810740_mv2](https://user-images.githubusercontent.com/95071627/188454874-a0691223-b8ec-4ee5-b1ac-c28d69ba6306.jpg)
 
 For this we  would be using Tasmota EU plug V2 by Athom . This is based on tasmota-HLW8032 , providing control using MQTT,Web UI , HTTP.
 
