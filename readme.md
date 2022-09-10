@@ -180,3 +180,4 @@ spec:
         - name: grafana-storage
 ```
 
+View the complete the documentation [here](https://docs.google.com/document/d/1_eB_ChCQsGblfbL9UBlEnR_j9zQ01nQuEXhGrMF6JlU/edit?usp=sharing)
